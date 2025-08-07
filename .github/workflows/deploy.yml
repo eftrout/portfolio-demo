@@ -1,0 +1,32 @@
+#This workflow deploys Terraform code to AWS every time there is a push to the main branch.
+# It uses the AWS credentials stored in GitHub Secrets to authenticate and deploy the infrastructure.
+name: Deploy Static Website to AWS
+
+on:
+  push:
+    branches:
+      - main #Only run on pushes to the main branch
+
+jobs:
+    terraform:
+        name: Terraform Apply #Job name shown in GitHub Actions UI
+        runs-on: ubuntu-latest #Run on the latest version of Ubuntu provided by GitHub Actions
+      
+        steps:
+            - name: Checkout code #checkout the repository code from repository
+              uses: actions/checkout@v2 #Pulls your repository code so the workflow can access it
+            - name: Configure AWS credentials #Configure AWS credentials for the workflow
+              uses: aws-actions/configure-aws-credentials@v4 #Sets up AWS credentials via OIDC
+              with:
+                role-to-assume: ${{ secrets.AWS_ROLE_ARN }} #AWS IAM role stored in GitHub Secrets
+                aws-region: us-east-2 #Specify the AWS region to deploy to
+            - name: Set up Terraform
+              uses: hashicorp/setup-terraform@v3 #Sets up Terraform CLI in the GitHub Actions environment
+              with:
+                terraform_version: 1.7.5 #Specify the version of Terraform to use
+            - name: Terraform Init
+              run: terraform init #Initializes the workspace and downloads required providers
+            - name: Terraform Plan
+              run: terraform plan #Shows what Terraform is going to do
+            - name: Terraform Apply
+              run: terraform apply -auto-approve -var="aws_region=us-east-2" -var="bucket_name=hello-world621"
