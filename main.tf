@@ -132,9 +132,6 @@ resource "aws_s3_bucket_policy" "site_policy" {
   })
 }
 
-# Optional: create an invalidation whenever site_index changes (not automatic here)
-# You can create invalidations in GitHub Actions after apply using the distribution id
-
 # Outputs
 output "s3_bucket_name" {
   value       = aws_s3_bucket.site_bucket[0].bucket
