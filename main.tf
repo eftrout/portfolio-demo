@@ -8,7 +8,6 @@ provider "aws" {
 # Create S3 bucket (kept private) for website content
 # this bucket will be used as the origin for CloudFront
 resource "aws_s3_bucket" "site_bucket" {
-  count  = var.site_enabled ? 1 : 0
   bucket = var.bucket_name
 
   tags = var.project_tags
@@ -17,7 +16,7 @@ resource "aws_s3_bucket" "site_bucket" {
 # Keep public access blocked (recommended)
 resource "aws_s3_bucket_public_access_block" "block_public" {
   count  = var.site_enabled ? 1 : 0
-  bucket = aws_s3_bucket.site_bucket[0].id
+  bucket = aws_s3_bucket.site_bucket.id
 
   block_public_acls       = true
   block_public_policy     = true
@@ -28,7 +27,7 @@ resource "aws_s3_bucket_public_access_block" "block_public" {
 # Enable website configuration (optional — CloudFront will use the bucket as origin)
 resource "aws_s3_bucket_website_configuration" "site_config" {
   count  = var.site_enabled ? 1 : 0
-  bucket = aws_s3_bucket.site_bucket[0].id
+  bucket = aws_s3_bucket.site_bucket.id
 
   index_document {
     suffix = "index.html"
@@ -42,7 +41,7 @@ resource "aws_s3_bucket_website_configuration" "site_config" {
 # Upload index.html to the bucket (object will NOT be public)
 resource "aws_s3_object" "site_index" {
   count        = var.site_enabled ? 1 : 0
-  bucket       = aws_s3_bucket.site_bucket[0].id
+  bucket       = aws_s3_bucket.site_bucket.id
   key          = "index.html"
   source       = "index.html"
   content_type = "text/html"
@@ -67,13 +66,13 @@ resource "aws_cloudfront_distribution" "cdn" {
   default_root_object = "index.html" 
 
   origin {
-    domain_name              = aws_s3_bucket.site_bucket[0].bucket_regional_domain_name
-    origin_id                = "S3-${aws_s3_bucket.site_bucket[0].id}"
+    domain_name              = aws_s3_bucket.site_bucket.bucket_regional_domain_name
+    origin_id                = "S3-${aws_s3_bucket.site_bucket.id}"
     origin_access_control_id = aws_cloudfront_origin_access_control.oac[0].id
   }
 
   default_cache_behavior {
-    target_origin_id       = "S3-${aws_s3_bucket.site_bucket[0].id}"
+    target_origin_id       = "S3-${aws_s3_bucket.site_bucket.id}"
     viewer_protocol_policy = "redirect-to-https"
 
     allowed_methods = ["GET", "HEAD"]
@@ -103,7 +102,7 @@ resource "aws_cloudfront_distribution" "cdn" {
 # S3 bucket policy to allow CloudFront (only) to GetObject from the bucket
 resource "aws_s3_bucket_policy" "site_policy" {
   count  = var.site_enabled ? 1 : 0
-  bucket = aws_s3_bucket.site_bucket[0].id
+  bucket = aws_s3_bucket.site_bucket.id
 
   policy = jsonencode({
     Version = "2012-10-17"
@@ -115,7 +114,7 @@ resource "aws_s3_bucket_policy" "site_policy" {
           Service = "cloudfront.amazonaws.com"
         }
         Action   = "s3:GetObject"
-        Resource = "${aws_s3_bucket.site_bucket[0].arn}/*"
+        Resource = "${aws_s3_bucket.site_bucket.arn}/*"
         Condition = {
           StringEquals = {
             # Restrict by SourceArn to the CloudFront distribution
@@ -129,7 +128,7 @@ resource "aws_s3_bucket_policy" "site_policy" {
 
 # Outputs
 output "s3_bucket_name" {
-  value       = aws_s3_bucket.site_bucket[0].bucket
+  value       = aws_s3_bucket.site_bucket.bucket
   description = "S3 bucket name (private)"
   depends_on  = [aws_s3_object.site_index]
 }
