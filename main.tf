@@ -5,16 +5,11 @@ provider "aws" {
   region = var.aws_region
 }
 
-# Random suffix so bucket names are unique across AWS
-resource "random_id" "suffix" {
-  byte_length = 4
-}
-
 # Create S3 bucket (kept private) for website content
 # this bucket will be used as the origin for CloudFront
 resource "aws_s3_bucket" "site_bucket" {
   count  = var.site_enabled ? 1 : 0
-  bucket = "${var.bucket_name}-${random_id.suffix.hex}"
+  bucket = var.bucket_name
 
   tags = var.project_tags
 }
