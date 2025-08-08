@@ -21,7 +21,7 @@ jobs:
       - name: Configure AWS credentials #Configure AWS credentials for the workflow
         uses: aws-actions/configure-aws-credentials@v4 #Sets up AWS credentials via OIDC
         with:
-          role-to-assume: ${{ secrets.AWS_ROLE_ARN }} #AWS IAM role stored in GitHub Secrets
+          role-to-assume: arn:aws:iam::521819599837:role/S3CF #IAM role to assume for AWS access
           aws-region: us-east-2 #Specify the AWS region to deploy to
       - name: Set up Terraform
         uses: hashicorp/setup-terraform@v3 #Sets up Terraform CLI in the GitHub Actions environment
