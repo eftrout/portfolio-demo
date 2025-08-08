@@ -16,7 +16,7 @@ variable "site_enabled" {
 variable "bucket_name" {
   description = "Base name for S3 bucket"
   type        = string
-  default     = "hello-worldterra-174a0fda"
+  default     = "hello-worldterraforming"
 }
 
 # Common tags for resources
