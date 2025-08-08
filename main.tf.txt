@@ -1,0 +1,99 @@
+#Sets AWS Region for provider
+provider "aws" {
+  region = "us-east-1"
+}
+
+#Toggle to enable/disable the site deployment
+variable "site_enabled" {
+  description = "Enable or disable the entire site deployment"
+  type        = bool
+  default     = true
+}
+
+#Custom tages applied to all resources for tracking and management
+variable "project_tags" {
+  type = map(string)
+  default = {
+    Project       = "Portfolio"
+    Owner         = "alejandro-lopez"
+    AutoShutdown  = "true"
+  }
+}
+#This part generates a random suffix for the S3 bucket name to ensure uniqueness
+#and prevent conflicts with existing buckets.
+resource "random_id" "suffix" {
+  byte_length = 4
+}
+#Create the S3 bucket that will host the static site files.
+#It uses the random suffix to ensure the bucket name is unique.
+resource "aws_s3_bucket" "site_bucket" {
+  count  = var.site_enabled ? 1 : 0
+  bucket = "hello-world-8725-${random_id.suffix.hex}"
+  tags   = var.project_tags
+}
+#Block public access to the bucket for security best practices.
+#This ensures that the bucket is not publicly accessible unless explicitly configured.
+resource "aws_s3_bucket_public_access_block" "block_public" {
+  count  = var.site_enabled ? 1 : 0
+  bucket = aws_s3_bucket.site_bucket[0].id
+
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
+}
+#Upload the index.html file to the bucket.
+#This file serves as the entry point for the static site.
+resource "aws_s3_bucket_object" "index_html" {
+  count  = var.site_enabled ? 1 : 0
+  bucket = aws_s3_bucket.site_bucket[0].id
+  key    = "index.html"
+  source = "index.html" # Path to your local index.html file
+  acl    = "public-read" # Make the file publicly readable
+}
+#Enable static website hosting on the S3 bucket
+#This allows the bucket to serve static files like HTML, CSS, and JavaScript.
+resource "aws_s3_bucket_website_configuration" "site_config" {
+  count  = var.site_enabled ? 1 : 0
+  bucket = aws_s3_bucket.site_bucket[0].id
+
+  index_document {
+    suffix = "index.html"
+  }
+
+  error_document {
+    key = "error.html"
+  }
+}
+#Create a CloudFront distribution to serve the static site
+resource "aws_cloudfront_distribution" "cdn" {
+  count = var.site_enabled ? 1 : 0
+
+  enabled             = true
+  default_root_object = "index.html"
+
+  origin {
+    domain_name = aws_s3_bucket.site_bucket[0].bucket_regional_domain_name
+    origin_id   = "S3Origin"
+  }
+
+  default_cache_behavior {
+    allowed_methods  = ["GET", "HEAD"]
+    cached_methods   = ["GET", "HEAD"]
+    target_origin_id = "S3Origin"
+
+    viewer_protocol_policy = "redirect-to-https"
+  }
+
+  restrictions {
+    geo_restriction {
+      restriction_type = "none"
+    }
+  }
+
+  viewer_certificate {
+    cloudfront_default_certificate = true
+  }
+
+  tags = var.project_tags
+}
