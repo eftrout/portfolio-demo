@@ -6,6 +6,9 @@ on:
   push:
     branches:
       - main #Only run on pushes to the main branch
+permissions:
+  contents: read #Allow the workflow to read the repository contents
+  id-token: write #Allow the workflow to use OIDC for AWS authentication
 
 jobs:
     terraform:
@@ -30,3 +33,5 @@ jobs:
               run: terraform plan #Shows what Terraform is going to do
             - name: Terraform Apply
               run: terraform apply -auto-approve -var="aws_region=us-east-2" -var="bucket_name=hello-world621"
+            - name: Debug: AWS caller
+              run: aws sts get-caller-identity #Debugging step to verify AWS credentials are set up correctly
