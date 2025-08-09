@@ -29,9 +29,23 @@ jobs:
           terraform_version: 1.7.5 #Specify the version of Terraform to use
       - name: Terraform Init
         run: terraform init #Initializes the workspace and downloads required providers
+      - name: Import S3 bucket if not in state
+        run: |
+          BUCKET_NAME="hello-worldt"
+          RESOURCE_NAME="aws_s3_bucket.site_bucket"
+          if ! terraform state list | grep -q "$RESOURCE_NAME"; then echo "Importing $BUCKET_NAME into Terraform state..." terraform import $RESOURCE_NAME $BUCKET_NAME || echo "Import skipped"
+          else
+          echo "Bucket already in state — skipping import."
+          fi
+
       - name: Terraform Plan
         run: terraform plan #Shows what Terraform is going to do
       - name: Terraform Apply
-        run: terraform apply -auto-approve -var="aws_region=us-east-2" -var="bucket_name=hello-worldt"
-      - name: "Debug: AWS caller"
-        run: aws sts get-caller-identity #Debugging step to verify AWS credentials are set up correctly
+        run: terraform apply -auto-approve #Applies the Terraform plan without manual approval
+      - name: Invalidate CloudFront Cache
+        run: |
+          DISTRIBUTION_ID=$(terraform output -raw cloudfront_distribution_id)
+          echo "Invalidating CloudFront distribution $DISTRIBUTION_ID"
+          aws cloudfront create-invalidation --distribution-id $DISTRIBUTION_ID --paths /index.html #Invalidates the cache for index.html to ensure the latest version is served
+     # - name: "Debug: AWS caller"
+     #   run: aws sts get-caller-identity #Debugging step to verify AWS credentials are set up correctly
