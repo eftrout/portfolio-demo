@@ -12,14 +12,14 @@ variable "site_enabled" {
   default     = true
 }
 
-# Base bucket name (suffix will be added)
+# Base bucket name
 variable "bucket_name" {
   description = "Base name for S3 bucket"
   type        = string
   default     = "hello-worldt"
 }
 
-# Common tags for resources
+# Tags for resources
 variable "project_tags" {
   description = "Tags applied to all resources"
   type        = map(string)
