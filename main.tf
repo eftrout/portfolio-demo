@@ -136,3 +136,6 @@ output "cloudfront_index_url" {
   value       = "https://${aws_cloudfront_distribution.cdn.domain_name}/index.html"
   description = "Direct link to index.html via CloudFront"
 }
+output "cloudfront_distribution_id" {
+  value = aws_cloudfront_distribution.cdn.id
+}
