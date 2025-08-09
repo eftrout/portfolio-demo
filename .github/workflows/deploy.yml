@@ -32,6 +32,6 @@ jobs:
       - name: Terraform Plan
         run: terraform plan #Shows what Terraform is going to do
       - name: Terraform Apply
-        run: terraform apply -auto-approve -var="aws_region=us-east-2" -var="bucket_name=hello-worldterraforming"
+        run: terraform apply -auto-approve -var="aws_region=us-east-2" -var="bucket_name=hello-worldt"
       - name: "Debug: AWS caller"
         run: aws sts get-caller-identity #Debugging step to verify AWS credentials are set up correctly
