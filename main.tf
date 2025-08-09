@@ -12,7 +12,7 @@ resource "aws_s3_bucket" "site_bucket" {
 
   tags = var.project_tags
 }
-# Tells Terraform to track index.html file
+# Tells Terraform to track index.html files
 resource "aws_s3_object" "index_html" {
   bucket       = aws_s3_bucket.site_bucket.id
   key          = "index.html"
