@@ -46,6 +46,7 @@ jobs:
         run: |
           DISTRIBUTION_ID=$(terraform output -raw cloudfront_distribution_id)
           echo "Invalidating CloudFront distribution $DISTRIBUTION_ID"
-          aws cloudfront create-invalidation --distribution-id $DISTRIBUTION_ID --paths /index.html #Invalidates the cache for index.html to ensure the latest version is served
+          aws cloudfront create-invalidation --distribution-id $DISTRIBUTION_ID --paths /index.html 
+        #Invalidates the cache for index.html to ensure the latest version is served
      # - name: "Debug: AWS caller"
      #   run: aws sts get-caller-identity #Debugging step to verify AWS credentials are set up correctly
