@@ -13,6 +13,15 @@ resource "aws_s3_bucket" "site_bucket" {
   tags = var.project_tags
 }
 
+# Tells Terraform to track index.html file
+resource "aws_s3_bucket_object" "index_html" {
+  bucket       = aws_s3_bucket.site_bucket.bucket
+  key          = "index.html"
+  source       = "${path.module}/index.html"
+  content_type = "text/html"
+  etag         = filemd5("${path.module}/index.html")
+}
+
 # Keep public access blocked (recommended)
 resource "aws_s3_bucket_public_access_block" "block_public" {
   bucket = aws_s3_bucket.site_bucket.id
