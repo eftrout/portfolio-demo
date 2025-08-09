@@ -8,7 +8,7 @@ provider "aws" {
 # Create S3 bucket (kept private) for website content
 # this bucket will be used as the origin for CloudFront
 resource "aws_s3_bucket" "site_bucket" {
-  bucket = var.bucket_name #defined in variables.tf
+  bucket = "var.bucket_name" #defined in variables.tf
 
   tags = var.project_tags
 }
@@ -56,8 +56,7 @@ resource "aws_cloudfront_origin_access_control" "oac" {
 
 # CloudFront distribution, using the OAC to securely fetch from S3
 resource "aws_cloudfront_distribution" "cdn" {
-  count = var.site_enabled ? 1 : 0
-
+  
   enabled             = true
   default_root_object = "index.html" 
 
