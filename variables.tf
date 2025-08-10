@@ -29,3 +29,9 @@ variable "project_tags" {
     AutoShutdown = "true"
   }
 }
+
+variable "callback_url" {
+  type = string
+  description = "URL Cognito should redirect to after login"
+  default = "https://d2dm8ywpcgot4j.cloudfront.net"
+}

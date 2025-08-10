@@ -10,4 +10,55 @@
 
     <p>Address bucket deprecated warning.</p>
 </body>
-  
+
+
+<script src="https://cdn.jsdelivr.net/npm/aws-amplify@latest/dist/aws-amplify.min.js"></script>
+<script>
+  const { Auth } = aws_amplify;
+  Auth.configure({
+    region: "us-east-2",
+    userPoolId: "us-east-2_9UG3WjYOa",
+    userPoolWebClientId: "3erb1rqbqo0lfsf6jv125mdg2m"
+  });
+</script>
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Cognito Login Test</title>
+</head>
+<body>
+  <h1>Login with Cognito</h1>
+
+  <input type="text" id="username" placeholder="Username">
+  <input type="password" id="password" placeholder="Password">
+  <button id="loginBtn">Login</button>
+
+  <pre id="output"></pre>
+
+  <!-- Load AWS Amplify from CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/aws-amplify@latest/dist/aws-amplify.min.js"></script>
+  <script>
+    // Replace these values with your Cognito User Pool settings
+    aws_amplify.Auth.configure({
+      region: "us-east-2", // Your AWS region
+      userPoolId: "us-east-2_9UG3WjYOa", // Your Cognito User Pool ID
+      userPoolWebClientId: "3erb1rqbqo0lfsf6jv125mdg2m" // Your App Client ID
+    });
+
+    document.getElementById('loginBtn').addEventListener('click', async () => {
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
+
+      try {
+        const user = await aws_amplify.Auth.signIn(username, password);
+        document.getElementById('output').textContent = JSON.stringify(user, null, 2);
+      } catch (error) {
+        document.getElementById('output').textContent = "Error: " + error.message;
+      }
+    });
+  </script>
+</body>
+</html>
+
